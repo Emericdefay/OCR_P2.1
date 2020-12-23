@@ -120,6 +120,53 @@ def datafileexist(filename):
     filepath = os.path.join(pathtofolder(), "datas", filename)
     return os.path.exists(filepath+".csv")
 
+def eraseDatas(folderToRemove='datas'):
+    """
+    Erase all the content from a folder. Then erase the folder.
+
+    :param folderToRemove: the folder removed
+    :type folderToRemove: str
+    """
+    directoryToRemove = os.path.join(pathtofolder(), folderToRemove)
+    for i in os.listdir(directoryToRemove):
+        os.remove(os.path.join(directoryToRemove, i))
+    os.rmdir(directoryToRemove) # Now the folder is empty of files
+    pass
+
+
+def listFolders(folderRoot):
+    """
+    Return a list of folders in the <folderRoot> folder.
+
+    :param folderRoot: folder's path where other directories exist.
+    :type folderRoot: str
+    :return: list of directories
+    :rtype: list (str)
+    """
+    return os.listdir(folderRoot)
+
+
+def erasePictures(folderPicture='pictures'):
+    """
+    Function that erases the /pictures folder.
+
+    :param folderPictures: name of the folder that contains pictures.
+    :type folderPictures: str
+    """
+    pathToPictures = os.path.join(pathtofolder(), folderPicture)
+    folderList = listFolders(pathToPictures)
+
+    for category in folderList:
+        erasePath = os.path.join(folderPicture, category)
+        eraseDatas(erasePath)
+
+    eraseDatas(pathToPictures) # Now /pictures is empty of files/folders
+    pass
+
+def eraseAll():
+    """Erase /pictures and /datas."""
+    eraseDatas()
+    erasePictures()
 
 # 2. Manage the .csv
 def createcsv(filename):
@@ -512,16 +559,31 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
         # stop manuel
+        print("WARNING : You stopped the program manually.")
+        # TODO : Propose if the user want to erase datas.
+        user = input("Would you like to erase datas?(Y/N)")
+        if user == "Y":
+            eraseAll()
         pass
     except ConnectionError:
+        # TODO : Propose if the user want to erase datas.
         #connection
         raise
     except TimeoutError:
         #connection
         raise
     except requests.exceptions.ConnectionError:
-        # Mauvaise addresse fournit
-        print('a')
-    except requests.exceptions.MissingSchema:
-        # Leak https://
+        # Wrong address.
+        print("WARNING : The address given doesn't fit.")
+        print("\t The correct format is : http://adress.com/")
+        print("\t Please, modify the address.")
         raise
+    except requests.exceptions.MissingSchema:
+        # https:// is missing.
+        print("WARNING : The address given doesn't fit.")
+        print("\t The correct format is : http://adress.com/")
+        print("\t Please, modify the address.")
+        raise
+    except bs4.FeatureNotFound:
+        # lxml issue
+        pass
