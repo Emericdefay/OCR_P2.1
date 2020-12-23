@@ -189,12 +189,11 @@ def createcsv(filename):
                "price_including_tax", "price_excluding_tax", "number_available",
                "product_description", "category", "review_rating", "image_url"]
 
-    with open(filename+'.csv', 'w', newline="") as csvfile:
+    with open(filename+'.csv', 'w', newline="", encoding='utf-8') as csvfile:
         csvfile.write('sep="') # Define the separator as <">.
         csvfile.write("\n")
         resultWriter = csv.writer(csvfile, delimiter = '"', dialect = "excel")
         resultWriter.writerow(csvkeys)
-        csvfile.write("\n")
     pass
 
 
@@ -209,10 +208,9 @@ def addcsv(data, filename):
     """
     filename = os.path.join(pathtofolder(), 'datas', filename)
 
-    with open(filename + '.csv', 'a', newline="", encoding="utf-8") as csvfile:
+    with open(filename + '.csv', 'a', newline="", encoding='utf-8') as csvfile:
         resultWriter = csv.writer(csvfile, delimiter = '"', dialect = "excel")
         resultWriter.writerow(data)
-        csvfile.write('\n')
 
     pass
 
@@ -261,7 +259,9 @@ def scrapOne(url):
 
     if response.ok:
         # If the server is responding :
-        soup = bs4.BeautifulSoup(response.text, 'lxml')
+        #soup = bs4.BeautifulSoup(response.text, 'lxml')
+        soup = bs4.BeautifulSoup(response.content.decode('utf-8','ignore'),
+                                 'lxml')
 
         # Get data :
         cellules = soup.findAll('td')
@@ -322,7 +322,7 @@ def scrapOne(url):
 
         image_url = picture
 
-        datas = '" '.join(list(map(str, (product_page_url,
+        datas = (list(map(str, (product_page_url,
                                          universal_product_code, title,
                                          price_including_tax,
                                          price_excluding_tax,
@@ -512,7 +512,7 @@ def main(url):
 
     for link in linkscat[1:]:
         print("Scrap ({}/{}): ".format(compteur, len(linkscat)-1)
-              + str(link[51:-10]))
+              + str(link[51:-11]))
         managecat(link)
         compteur += 1
 
