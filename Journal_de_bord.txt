@@ -4,29 +4,36 @@
 	Format d'un .csv
 	Création d'un environnement virtuel
 	Programmation scrapOne() : Fonction qui extrait les informations d'une page d'un livre
-	
 	Mettre en place le README.md
 	Créer le requirements.txt
 	Push sur le github
+
 11/12/2020	
 	Gérer les pages de livres
 	Reflechir à la structure des données
 	Prog. Gestion des pages et liste des urls
+
 13/12/2020	
 	Gérer les catégories
 	Liste des catégorie
+
 15/12/2020	
 	Fonction de téléchargement d'images
 	
 18/12/2020	
 	Entretien avec mon mentor, révision du code 
 	Création d'un autre github
+
 20/12/2020
 	Remise en forme, librairies
 	Code en anglais.
 	Plus de magique var
 	Docstrings inspirée de Sam & Max
+
 22/12/2020
 	Push
 	Exceptions
 	Eclaircissement code ( parser )
+
+23/12/2020
+	csv writer

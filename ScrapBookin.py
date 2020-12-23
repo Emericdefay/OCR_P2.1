@@ -7,7 +7,7 @@
 import os
 import sys
 import time
-# import csv
+import csv
 # Need to be installed on virtual environments.
 import requests
 import bs4
@@ -120,6 +120,7 @@ def datafileexist(filename):
     filepath = os.path.join(pathtofolder(), "datas", filename)
     return os.path.exists(filepath+".csv")
 
+
 def eraseDatas(folderToRemove='datas'):
     """
     Erase all the content from a folder. Then erase the folder.
@@ -163,10 +164,13 @@ def erasePictures(folderPicture='pictures'):
     eraseDatas(pathToPictures) # Now /pictures is empty of files/folders
     pass
 
+
 def eraseAll():
-    """Erase /pictures and /datas."""
+    """Erase /pictures and /datas from the working directory."""
     eraseDatas()
     erasePictures()
+    pass
+
 
 # 2. Manage the .csv
 def createcsv(filename):
@@ -185,19 +189,11 @@ def createcsv(filename):
                "price_including_tax", "price_excluding_tax", "number_available",
                "product_description", "category", "review_rating", "image_url"]
 
-    ####### A CHANGER!!!
-    #            |
-    #            V
-    # Something with :
-    # import csv
-    #   with open...
-    # csv.write(csvkeys...
-
-    with open(filename+'.csv', 'w', encoding="utf-8") as csvfile:
-        csvfile.write("product_page_url; universal_product_code; title")
-        csvfile.write("; price_including_tax; price_excluding_tax")
-        csvfile.write("; number_available; product_description; category")
-        csvfile.write("; review_rating; image_url")
+    with open(filename+'.csv', 'w', newline="") as csvfile:
+        csvfile.write('sep="') # Define the separator as <">.
+        csvfile.write("\n")
+        resultWriter = csv.writer(csvfile, delimiter = '"', dialect = "excel")
+        resultWriter.writerow(csvkeys)
         csvfile.write("\n")
     pass
 
@@ -213,23 +209,12 @@ def addcsv(data, filename):
     """
     filename = os.path.join(pathtofolder(), 'datas', filename)
 
-    ####### A CHANGER!!!
-    #            |
-    #            V
-    # Something with :
-    # import csv
-    #   with open...
-    # csv.write(csvkeys...
+    with open(filename + '.csv', 'a', newline="", encoding="utf-8") as csvfile:
+        resultWriter = csv.writer(csvfile, delimiter = '"', dialect = "excel")
+        resultWriter.writerow(data)
+        csvfile.write('\n')
 
-    with open(filename + '.csv', 'a', encoding="utf-8") as csv:
-        csv.write(data)
-        csv.write('\n')
     pass
-
-
-def replacepointvirgule(text):
-    """Function KO"""
-    return text.replace(";","-")
 
 
 # 3. Gestion des images
@@ -264,7 +249,6 @@ def scrapOne(url):
     Core function of this program:
     This function get all the informations needed for each book of the
     website. It return the datas and the category.
-
 
     :param url: The url of the book scraped
     :type url: str
@@ -319,7 +303,6 @@ def scrapOne(url):
         title = title.split("\n")[1]
         title = title.replace(" | Books to Scrape - Sandbox", "")
         title = title.replace('    ','')
-        #title = replacepointvirgule(title)
 
         # cellules[2] & [3] give the raw data.
         # by using .text[1:] you get the devise and the amount.
@@ -332,7 +315,6 @@ def scrapOne(url):
         number_available = number_available.replace(" available)</td>", "")
 
         product_description = str(desc).split('\n')[1]
-        #product_description = replacepointvirgule(product_description)
 
         category = category
 
@@ -340,14 +322,7 @@ def scrapOne(url):
 
         image_url = picture
 
-        ####### A CHANGER!!!
-        #            |
-        #            V
-        # Something with :
-        # import csv
-        #   with open...
-        # csv.write(csvkeys...
-        datas = '; '.join(list(map(str, (product_page_url,
+        datas = '" '.join(list(map(str, (product_page_url,
                                          universal_product_code, title,
                                          price_including_tax,
                                          price_excluding_tax,
@@ -537,7 +512,7 @@ def main(url):
 
     for link in linkscat[1:]:
         print("Scrap ({}/{}): ".format(compteur, len(linkscat)-1)
-              + str(link[50:-10]))
+              + str(link[51:-10]))
         managecat(link)
         compteur += 1
 
@@ -560,30 +535,41 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         # stop manuel
         print("WARNING : You stopped the program manually.")
-        # TODO : Propose if the user want to erase datas.
         user = input("Would you like to erase datas?(Y/N)")
-        if user == "Y":
+        if user.lower() == "y":
             eraseAll()
+            print("Erased all the datas.")
         pass
-    except ConnectionError:
-        # TODO : Propose if the user want to erase datas.
-        #connection
-        raise
-    except TimeoutError:
-        #connection
-        raise
-    except requests.exceptions.ConnectionError:
-        # Wrong address.
+
+    except (ConnectionError, TimeoutError, requests.exceptions.ConnectionError):
+        #connection issue
+        print("WARNING : Connection issue, verify your internet.")
+        pass
+
+    except (requests.exceptions.MissingSchema):
+        # missing http://
         print("WARNING : The address given doesn't fit.")
         print("\t The correct format is : http://adress.com/")
         print("\t Please, modify the address.")
-        raise
-    except requests.exceptions.MissingSchema:
-        # https:// is missing.
-        print("WARNING : The address given doesn't fit.")
-        print("\t The correct format is : http://adress.com/")
-        print("\t Please, modify the address.")
-        raise
+        pass
+
     except bs4.FeatureNotFound:
         # lxml issue
+        print("You need to install lxml. Please look at the README.md")
+        user = input("Would you like to erase datas?(Y/N)")
+        if user.lower() == "y":
+            eraseAll()
+            print("Erased all the datas.")
         pass
+
+    except PermissionError:
+        print("Not enough permission")
+        pass
+
+    except:
+        print("Unexpected error: ", sys.exc_info()[0])
+        user = input("Would you like to erase datas?(Y/N)")
+        if user.lower() == "y":
+            eraseAll()
+            print("Erased all the datas.")
+        raise
