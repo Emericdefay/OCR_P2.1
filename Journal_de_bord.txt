@@ -37,3 +37,8 @@
 
 23/12/2020
 	csv writer
+	add exceptions
+24/12/2020
+	Add docstring 
+	clear code
+	

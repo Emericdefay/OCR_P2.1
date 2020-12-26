@@ -1,7 +1,3 @@
-"""
-
-"""
-
 # Libraries :
 # Already installed on virtual environments.
 import os
@@ -34,7 +30,6 @@ def pathtofolder():
     """
     return os.getcwd()
 
-
 def createdatafolder(name):
     """
     Create the <name> folder at the root of ScrapBookin.py.
@@ -50,7 +45,6 @@ def createdatafolder(name):
     folder = os.path.join(pathtofolder(),name)
     os.makedirs(folder)
     pass
-
 
 def datafolderexist(name):
     """
@@ -70,7 +64,6 @@ def datafolderexist(name):
     """
     folderpath = os.path.join(pathtofolder(), name)
     return os.path.exists(folderpath)
-
 
 def checkfolderdata(folder = 'datas'):
     """
@@ -98,7 +91,6 @@ def checkfolderdata(folder = 'datas'):
         createdatafolder(folder)
         checkfolderdata(folder)
 
-
 def datafileexist(filename):
     """
     Check if the file <filename> in /datas exists and return True or False.
@@ -117,9 +109,9 @@ def datafileexist(filename):
 
     .. warning:: Only check the "datas" folder
     """
-    filepath = os.path.join(pathtofolder(), "datas", filename)
-    return os.path.exists(filepath+".csv")
-
+    filePath = os.path.join(pathtofolder(), "datas", filename)
+    fileFormat = '.csv'
+    return os.path.exists(f'{filePath+fileFormat}')
 
 def eraseDatas(folderToRemove='datas'):
     """
@@ -134,7 +126,6 @@ def eraseDatas(folderToRemove='datas'):
     os.rmdir(directoryToRemove) # Now the folder is empty of files
     pass
 
-
 def listFolders(folderRoot):
     """
     Return a list of folders in the <folderRoot> folder.
@@ -145,7 +136,6 @@ def listFolders(folderRoot):
     :rtype: list (str)
     """
     return os.listdir(folderRoot)
-
 
 def erasePictures(folderPicture='pictures'):
     """
@@ -164,52 +154,81 @@ def erasePictures(folderPicture='pictures'):
     eraseDatas(pathToPictures) # Now /pictures is empty of files/folders
     pass
 
-
 def eraseAll():
     """Erase /pictures and /datas from the working directory."""
-    eraseDatas()
-    erasePictures()
+    user = input("Would you like to erase all data? (Y/N)")
+
+    if 'y' in user.lower() and not 'n' in user.lower():
+        if checkfolderdata():
+            eraseDatas()
+            print("/datas folder erased.")
+        if checkfolderdata('pictures'):
+            erasePictures()
+            print("/pictures folder erased.")
+        print("Datas are erased.")
+    else:
+        print("Datas not erased : Be sure they're not corrupted.")
     pass
 
 
 # 2. Manage the .csv
-def createcsv(filename):
+def excelExport(choice):
+    """
+    A modification to .csv - add a sep definition, helping the reading in
+    Excel.
+    :param choice: 'excel' if you want a better reading in excel
+    :type choice: str
+    :return: Return the informations to add on .csv files at the first line
+    :rtype: str
+
+    .. warning::
+    """
+    if "excel" in choice:
+        return 'sep=|\n'
+    else:
+        return ''
+
+def createcsv(fileName):
     """
     Create or rewrite the csv file of each category.
 
-    :param filename: Name of the .csv file that'll be created in .././datas/
-    :type filename: str
+    :param fileName: Name of the .csv file that'll be created in .././datas/
+    :type fileName: str
 
     .. note:: If it exists, will erase the current <filename>.csv and write the
               informations wrote bellow.
     """
-    filename = os.path.join(pathtofolder(), 'datas', filename)
+    fileName = os.path.join(pathtofolder(), 'datas', fileName)
+    fileFormat = '.csv'
+    file = f'{fileName + fileFormat}'
 
-    csvkeys = ["product_page_url", "universal_product_code", "title",
+    csvKeys = ["product_page_url", "universal_product_code", "title",
                "price_including_tax", "price_excluding_tax", "number_available",
                "product_description", "category", "review_rating", "image_url"]
 
-    with open(filename+'.csv', 'w', newline="", encoding='utf-8') as csvfile:
-        csvfile.write('sep="') # Define the separator as <">.
-        csvfile.write("\n")
-        resultWriter = csv.writer(csvfile, delimiter = '"', dialect = "excel")
-        resultWriter.writerow(csvkeys)
+    addon = excelExport('excel')
+
+    with open(file, 'w', newline="", encoding='utf-8') as csvFile:
+        csvFile.write(addon) # Define the separator as <">.
+        resultWriter = csv.writer(csvFile, delimiter = '|', dialect = "excel")
+        resultWriter.writerow(csvKeys)
     pass
 
-
-def addcsv(data, filename):
+def addcsv(data, fileName):
     """
     Add new <data> on the <filename> .csv file. (at ./datas/)
 
     :param data: datas scraped
-    :param filename: Name of the .csv written
+    :param fileName: Name of the .csv written
     :type data: str
-    :type filename: str
+    :type fileName: str
     """
-    filename = os.path.join(pathtofolder(), 'datas', filename)
+    fileName = os.path.join(pathtofolder(), 'datas', fileName)
+    fileFormat = '.csv'
+    file = f'{fileName+fileFormat}'
 
-    with open(filename + '.csv', 'a', newline="", encoding='utf-8') as csvfile:
-        resultWriter = csv.writer(csvfile, delimiter = '"', dialect = "excel")
+    with open(file, 'a', newline="", encoding='utf-8') as csvFile:
+        resultWriter = csv.writer(csvFile, delimiter = '|', dialect = "excel")
         resultWriter.writerow(data)
 
     pass
@@ -230,13 +249,15 @@ def downloadpic(url, name, path):
     a = requests.get(url)
 
     checkfolderdata("pictures")
-    folderpath = os.path.join("pictures", path)
+    folderPath = os.path.join("pictures", path)
 
-    checkfolderdata(folderpath)
+    checkfolderdata(folderPath)
 
-    filepath = os.path.join(folderpath, name)
+    filePath = os.path.join(folderPath, name)
+    fileFormat = '.jpg'
+    file = f'{filePath + fileFormat}'
 
-    with open(filepath + '.jpg', "wb") as pic:
+    with open(file, "wb") as pic:
         pic.write(a.content)
     pass
 
@@ -259,7 +280,6 @@ def scrapOne(url):
 
     if response.ok:
         # If the server is responding :
-        #soup = bs4.BeautifulSoup(response.text, 'lxml')
         soup = bs4.BeautifulSoup(response.content.decode('utf-8','ignore'),
                                  'lxml')
 
@@ -270,6 +290,12 @@ def scrapOne(url):
         stars = soup.find('p', {'class': "star-rating"})
         stars = str(stars).split('\n')[0]
 
+        dictStars = {'One':1, 'Two':2, 'Three':3, 'Four':4, 'Five':5}
+
+        for key in dictStars:
+            if key in stars:
+                review_rating = dictStars[key]
+        """
         if 'One' in stars:
             review_rating = 1
         if 'Two' in stars:
@@ -280,6 +306,7 @@ def scrapOne(url):
             review_rating = 4
         if 'Five' in stars:
             review_rating = 5
+        """
 
         category = []
         for text in soup.findAll("ul", {"class": "breadcrumb"}):
@@ -292,7 +319,7 @@ def scrapOne(url):
 
         picture = soup.find('img')
         picture = str(picture).split('src="../..')[1][:-3]
-        picture = 'http://books.toscrape.com' + picture
+        picture = f'http://books.toscrape.com{picture}'
 
         # Write Datas :
         product_page_url = url
@@ -358,14 +385,16 @@ def scraplinksbooks(urlcat):
 
     links = []
     articles = soup.findAll('article', {'class': "product_pod"})
-    urlroot = "http://books.toscrape.com/catalogue/"
+    urlRoot = "http://books.toscrape.com/catalogue/"
 
     for article in articles:
         link = str(article.find('h3').a)
         link = link.split(" title")[0][18:-1]
         link = link.replace('catalogue/', '')
 
-        links.append(urlroot+link)
+        fullLink = f'{urlRoot+link}'
+
+        links.append(fullLink)
 
     return links
 
@@ -427,7 +456,7 @@ def scrapcat(urlcat):
     linksbooks = []
 
     for i in range(len(linkscat)):
-        link = urlcat + linkscat[i]
+        link = f'{urlcat + linkscat[i]}'
         linksbooks += scraplinksbooks(link)
 
     return linksbooks
@@ -500,12 +529,19 @@ def detectCat(url):
 # Main function
 def main(url):
     """
-
+    The main function:
+        Take all url of categories of the website and work category by category.
+        At each category, take all urls of books and edit the .csv + download
+        pictures of every books.
+    Datas:
+        The datas are transfered in ./datas/ and ranged in <category>.csv
+    Pictures:
+        The pictures are transfered in ./pictures/ and classed also by category.
 
     :param url: the url of the website
     :type url: str
 
-    .. note::
+    .. note:: Only work on : http://books.toscrape.com/
     """
     linkscat = detectCat(url)
     compteur = 1
@@ -524,7 +560,7 @@ if __name__ == '__main__':
     try:
         temps1 = time.time()
         url = "http://books.toscrape.com/"
-        print("Scraping website : {}...".format(url))
+        print(f"Scraping website : {url}...")
         main(url)
         temps2 = time.time()
         lap = temps2 - temps1
@@ -535,10 +571,8 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         # stop manuel
         print("WARNING : You stopped the program manually.")
-        user = input("Would you like to erase datas?(Y/N)")
-        if user.lower() == "y":
-            eraseAll()
-            print("Erased all the datas.")
+
+        eraseAll()
         pass
 
     except (ConnectionError, TimeoutError, requests.exceptions.ConnectionError):
@@ -556,20 +590,17 @@ if __name__ == '__main__':
     except bs4.FeatureNotFound:
         # lxml issue
         print("You need to install lxml. Please look at the README.md")
-        user = input("Would you like to erase datas?(Y/N)")
-        if user.lower() == "y":
-            eraseAll()
-            print("Erased all the datas.")
+
+        eraseAll()
         pass
 
     except PermissionError:
-        print("Not enough permission")
+        # Read only?
+        print("Not enough permission : One .csv file is probably open.")
         pass
 
     except:
         print("Unexpected error: ", sys.exc_info()[0])
-        user = input("Would you like to erase datas?(Y/N)")
-        if user.lower() == "y":
-            eraseAll()
-            print("Erased all the datas.")
+
+        eraseAll()
         raise
