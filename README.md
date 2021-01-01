@@ -13,7 +13,7 @@ Informations scraped are :
 * Evaluation of the product : review_rating
 * Url of the picture : image_url
 
-# To go further :
+# Potential additional features :
 - [x] Eraser : Propose to the user to erase datas if they might be corrupted
 - [ ] Verification : if datas already exist in the file .csv
 - [ ] Edit the path where files are written

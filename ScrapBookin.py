@@ -219,7 +219,7 @@ def addcsv(data, fileName):
     Add new <data> on the <filename> .csv file. (at ./datas/)
 
     :param data: datas scraped
-    :param fileName: Name of the .csv written
+    :param fileName: Name of the .csv edited
     :type data: str
     :type fileName: str
     """
@@ -295,18 +295,6 @@ def scrapOne(url):
         for key in dictStars:
             if key in stars:
                 review_rating = dictStars[key]
-        """
-        if 'One' in stars:
-            review_rating = 1
-        if 'Two' in stars:
-            review_rating = 2
-        if 'Three' in stars:
-            review_rating = 3
-        if 'Four' in stars:
-            review_rating = 4
-        if 'Five' in stars:
-            review_rating = 5
-        """
 
         category = []
         for text in soup.findAll("ul", {"class": "breadcrumb"}):
@@ -402,7 +390,7 @@ def scraplinksbooks(urlcat):
 def detectPages(urlcat):
     """
     In a category of the site, detect if there is more than 1 page (20 books).
-    Then return the list each pages of the category ( first page : index.html)
+    Then return a list of each pages of the category ( first page : index.html)
 
     :param urlcat: Url of the category page
     :type urlcat: str
